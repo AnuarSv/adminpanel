@@ -1,0 +1,69 @@
+[
+        {
+            "id": "4231",
+            "name": "Anatoly Ivanov",
+            "email": "anatoly.ivanov@example.com",
+            "address": "456 Elm St, Moscow",
+            "purchasedSoftwares": [
+                "s1024",
+                "s1124"
+            ]
+        },
+        {
+            "id": "4584",
+            "name": "Sergey Petrov",
+            "email": "sergey.petrov@example.com",
+            "address": "789 Pine St, Saint Petersburg",
+            "purchasedSoftwares": [
+                "s1987",
+                "s2735",
+                "s1024",
+                "s1024",
+                "s1124"
+            ]
+        },
+        {
+            "id": "3892",
+            "name": "Maria Sokolova",
+            "email": "maria.sokolova@example.com",
+            "address": "321 Oak St, Kiev",
+            "purchasedSoftwares": [
+                "s1573",
+                "s4584"
+            ]
+        },
+        {
+            "id": "3145",
+            "name": "Alexei Popov",
+            "email": "alexei.popov@example.com",
+            "address": "123 Birch St, Minsk",
+            "purchasedSoftwares": [
+                "s1342",
+                "s1024",
+                "s3892",
+                "s1342",
+                "s2735"
+            ]
+        },
+        {
+            "id": "2735",
+            "name": "Dmitry Fedorov",
+            "email": "dmitry.fedorov@example.com",
+            "address": "456 Maple St, Yekaterinburg",
+            "purchasedSoftwares": [
+                "s4584",
+                "s1573",
+                "s4584",
+                "s3892"
+            ]
+        },
+        {
+            "id": "1987",
+            "name": "Irina Kuznetsova",
+            "email": "irina.kuznetsova@example.com",
+            "address": "789 Cedar St, Novosibirsk",
+            "purchasedSoftwares": [
+                "s4584"
+            ]
+        }
+]

@@ -1,0 +1,32 @@
+[
+    {
+      "id": "4231",
+      "username": "anatoly_ivanov",
+      "password": "securepassword123"
+    },
+    {
+      "id": "4584",
+      "username": "sergey_petrov",
+      "password": "anotherpassword456"
+    },
+    {
+      "id": "3892",
+      "username": "maria_sokolova",
+      "password": "maria_pass789"
+    },
+    {
+      "id": "3145",
+      "username": "alexei_popov",
+      "password": "popov_pass321"
+    },
+    {
+      "id": "2735",
+      "username": "dmitry_fedorov",
+      "password": "fedorov_secret"
+    },
+    {
+      "id": "1987",
+      "username": "irina_kuznetsova",
+      "password": "kuznetsova_lock"
+    }
+  ]
