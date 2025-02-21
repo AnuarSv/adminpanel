@@ -37,7 +37,10 @@ Install my-project with npm
     npm init -y 
 
 # 8. install librarys
-    npm install express mongoose body-parser path
+    npm install express mongoose body-parser path bcrypt express-session
+
+# Create admins
+    node createadmin.js
 
 # 9. Thats all run!!!
     node server.js
