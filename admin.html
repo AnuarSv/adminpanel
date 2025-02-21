@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar { height: 100vh; }
+        .collection-item { cursor: pointer; padding: 10px; border-radius: 5px; transition: 0.3s; }
+        .collection-item:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .index-table { width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row bg-primary text-white p-3 align-items-center">
+        <div class="col-md-3 text-center">
+            <h1><i class="bi bi-database"></i> Software Store DB</h1>
+        </div>
+    
+        <div class="col-md-6 d-flex justify-content-center align-items-center gap-2">
+            <select id="filterField" class="form-select w-auto">
+                <option value="">All Fields</option>
+            </select>
+    
+            <input type="text" id="searchInput" class="form-control w-auto" placeholder="Search..." style="min-width: 200px;">
+            
+            <button class="btn btn-light" onclick="searchCollection()">Search</button>
+        </div>
+    
+        <div class="col-md-3 text-center">
+            <h1>
+                <img id="adminPic" src="default.jpg" class="rounded-circle" width="50" height="50" alt="Profile">
+                <span id="adminName">Admin</span>
+            </h1>
+        </div>
+    </div>
+    
+
+    <div class="row">
+        <div class="col-md-2 bg-primary text-white sidebar p-3">
+            <h4>Collections</h4>
+            <ul class="nav flex-column" id="collectionsList"></ul>
+        </div>
+
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 id="collectionTitle">Select a Collection</h3>
+                <button class="btn btn-success" onclick="openAddPage()"><i class="bi bi-plus-circle"></i> Add</button>
+            </div>
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered bg-white">
+                    <thead id="dataHeader"></thead>
+                    <tbody id="dataContainer"></tbody>
+                </table>
+            </div>
+
+            <div class="mt-4">
+                <h4>Indexes</h4>
+                <table class="table table-striped table-bordered index-table">
+                    <thead>
+                    <tr>
+                        <th>Index Name</th>
+                        <th>Keys</th>
+                        <th>Unique</th>
+                    </tr>
+                    </thead>
+                    <tbody id="indexContainer"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadAdminProfile() {
+            const response = await fetch('/api/admin');
+            if (response.ok) {
+                const user = await response.json();
+                document.getElementById("adminName").innerText = user.username;
+                document.getElementById("adminPic").src = user.profilePic || "default.jpg";
+            } else {
+                window.location.href = "/login";
+            }
+        }
+    loadAdminProfile();
+    const collections = ["customers", "carts", "orders", "payments", "softwares", "cartItems"];
+    let currentCollection = "";
+
+    function loadCollections() {
+        const listContainer = document.getElementById("collectionsList");
+        listContainer.innerHTML = collections.map(col =>
+            `<li class="nav-item"><a class="nav-link text-white collection-item" onclick="loadCollection('${col}')">${col}</a></li>`
+        ).join("");
+    }
+    async function showIndexes() {
+        if (!currentCollection) return;
+
+        const response = await fetch(`/api/${currentCollection}/indexes`);
+        const indexes = await response.json();
+
+        console.log("Indexes received:", indexes);
+
+        const indexContainer = document.getElementById("indexContainer");
+        if (!indexes.length) {
+            indexContainer.innerHTML = "<tr><td colspan='3' class='text-center'>No Indexes Found</td></tr>";
+            return;
+        }
+
+        indexContainer.innerHTML = indexes.map(index => `
+            <tr>
+                <td>${index.name}</td>
+                <td>${Object.entries(index.key).map(([field, order]) => `${field}: ${order}`).join(", ")}</td>
+                <td>${index.unique ? "Yes" : "No"}</td>
+            </tr>
+        `).join("");
+    }
+
+    async function loadCollection(collection) {
+        currentCollection = collection;
+        document.getElementById("collectionTitle").innerText = collection;
+
+        const response = await fetch(`/api/${collection}`);
+        const data = await response.json();
+
+        if (!data.length) {
+            document.getElementById("dataContainer").innerHTML = "<tr><td colspan='100%' class='text-center'>No Data Available</td></tr>";
+            return;
+        }
+
+        updateFilterDropdown(Object.keys(data[0])); // Dynamically update filter fields
+        renderTable(data);
+        showIndexes();
+    }
+
+    function updateFilterDropdown(fields) {
+        const filterDropdown = document.getElementById("filterField");
+        filterDropdown.innerHTML = `<option value="">All Fields</option>` + 
+            fields.map(field => `<option value="${field}">${field}</option>`).join("");
+    }
+
+    function renderTable(data) {
+        const headerRow = document.getElementById("dataHeader");
+        const container = document.getElementById("dataContainer");
+
+        const keys = Object.keys(data[0]);
+        headerRow.innerHTML = `<tr>${keys.map(key => `<th>${key}</th>`).join("")}<th>Actions</th></tr>`;
+
+        container.innerHTML = data.map(doc => `
+            <tr>${keys.map(key => `<td>${formatValue(doc[key])}</td>`).join("")}
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="window.location.href='info.html?doc=${encodeURIComponent(JSON.stringify(doc))}'">Info</button>
+                    <button class="btn btn-sm btn-warning" onclick="window.location.href='edit.html?collection=${currentCollection}&doc=${encodeURIComponent(JSON.stringify(doc))}'">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteDocument('${doc._id}')">Delete</button>
+                </td>
+            </tr>`).join("");
+    }
+
+    function formatValue(value) {
+        return Array.isArray(value) ? value.map(item => JSON.stringify(item)).join("<br>") : value;
+    }
+
+    function openAddPage() {
+        if (!currentCollection) {
+            alert("Please select a collection first!");
+            return;
+        }
+        window.location.href = `add.html?collection=${currentCollection}`;
+    }
+
+    function deleteDocument(id) {
+        fetch(`/api/${currentCollection}/${id}`, { method: 'DELETE' })
+            .then(() => loadCollection(currentCollection));
+    }
+
+    async function searchCollection() {
+        if (!currentCollection) {
+            alert("Please select a collection first!");
+            return;
+        }
+
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const filterField = document.getElementById("filterField").value;
+
+        if (!query) {
+            loadCollection(currentCollection);
+            return;
+        }
+
+        const response = await fetch(`/api/${currentCollection}`);
+        let data = await response.json();
+
+        data = data.filter(doc => {
+            if (!filterField) {
+                return Object.values(doc).some(value => String(value).toLowerCase().includes(query));
+            } else {
+                return doc[filterField] && String(doc[filterField]).toLowerCase().includes(query);
+            }
+        });
+
+        renderTable(data);
+    }
+
+    window.onload = loadCollections;
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
